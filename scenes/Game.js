@@ -85,6 +85,23 @@ export default class Game extends Phaser.Scene {
       fill: "#000",
     });
 
+    // Add timer text in the top-right corner
+    // Agregar texto de temporizador en la esquina superior derecha
+    this.timeLeft = 30; // Start at 30 seconds // Comienza en 30 segundos
+    this.timerText = this.add.text(750, 16, `Time: ${this.timeLeft}`, {
+      fontSize: "32px",
+      fill: "#000",
+    }).setOrigin(1, 0); // Align to the top-right corner // Alinear a la esquina superior derecha
+
+    // Create a timed event to decrease the timer every second
+    // Crear un evento temporizado para disminuir el temporizador cada segundo
+    this.timerEvent = this.time.addEvent({
+      delay: 1000, // 1 second
+      callback: this.updateTimer,
+      callbackScope: this,
+      loop: true,
+    });
+
     this.physics.add.collider(this.player, this.platforms);
 
     this.physics.add.collider(this.stars, this.platforms);
@@ -104,6 +121,10 @@ export default class Game extends Phaser.Scene {
       null,
       this
     );
+
+    // Add input for the "R" key
+    // Agregar entrada para la tecla "R"
+    this.restartKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
   }
 
   update() {
@@ -124,6 +145,42 @@ export default class Game extends Phaser.Scene {
 
     if (this.cursors.up.isDown && this.player.body.touching.down) {
       this.player.setVelocityY(-330);
+    }
+
+    // Check if the "R" key is pressed to restart the game
+    // Verifica si la tecla "R" es presionada para reiniciar el juego
+    if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
+      this.scene.restart();
+    }
+  }
+
+  updateTimer() {
+    if (this.timeLeft > 0) {
+      this.timeLeft--; // Decrease the time
+      this.timerText.setText(`Time: ${this.timeLeft}`); // Update the text
+    } else {
+      // Time is up, trigger Game Over
+      this.timerEvent.remove(); // Stop the timer
+      this.physics.pause(); // Pause the game
+      this.player.setTint(0xff0000); // Optional: Add visual feedback
+      this.player.anims.play("turn");
+      this.gameOver = true;
+
+      // Add "Game Over" text
+      // Agregar texto de "Game Over"
+      this.gameOverText = this.add.text(400, 300, "GAME OVER", {
+        fontSize: "64px",
+        fill: "#ff0000",
+        stroke: "#000000",
+        strokeThickness: 6,
+      }).setOrigin(0.5);
+
+      // Add restart instruction
+      // Agrega instruccion de reinicio
+      this.restartText = this.add.text(400, 370, "Press R to Restart", {
+        fontSize: "32px",
+        fill: "#ffffff",
+      }).setOrigin(0.5);
     }
   }
 
@@ -160,5 +217,23 @@ export default class Game extends Phaser.Scene {
     this.player.anims.play("turn");
 
     this.gameOver = true;
+
+    // Add "Game Over" text
+    // Agregar texto de "Game Over"
+    this.gameOverText = this.add.text(400, 300, "GAME OVER", {
+        fontSize: "64px",
+        fill: "#ff0000",
+        stroke: "#000000",
+        strokeThickness: 6,
+
+        
+    }).setOrigin(0.5);
+
+    // Add restart instruction
+    // Agrega instruccion de reinicio
+    this.restartText = this.add.text(400, 370, "Press R to Restart", {
+        fontSize: "32px",
+        fill: "#ffffff",
+    }).setOrigin(0.5);
   }
 }
